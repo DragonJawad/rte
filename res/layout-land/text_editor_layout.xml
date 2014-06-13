@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#D3D3D3"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/te_toggle_section"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <ToggleButton
+                android:id="@+id/te_toggleTitle"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:drawableTop="@drawable/appbar_text_sans"
+                android:textOff=""
+                android:textOn="" />
+
+            <ToggleButton
+                android:id="@+id/te_toggleBulletList"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:drawableTop="@drawable/appbar_list_check"
+                android:textOff=""
+                android:textOn="" />
+
+            <ToggleButton
+                android:id="@+id/te_toggleBold"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:drawableTop="@drawable/appbar_text_bold"
+                android:textOff=""
+                android:textOn="" />
+
+            <ToggleButton
+                android:id="@+id/te_toggleItalics"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:drawableTop="@drawable/appbar_text_italic"
+                android:textOff=""
+                android:textOn="" />
+
+            <ToggleButton
+                android:id="@+id/te_toggleUnderline"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:drawableTop="@drawable/appbar_text_underline"
+                android:textOff=""
+                android:textOn="" />
+
+            <ToggleButton
+                android:id="@+id/te_toggleStrikeThrough"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:drawableTop="@drawable/appbar_text_strikethrough"
+                android:textOff=""
+                android:textOn="" />
+
+            <ToggleButton
+                android:id="@+id/te_toggleLinks"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:drawableTop="@drawable/appbar_link"
+                android:textOff=""
+                android:textOn="" />
+
+            <ToggleButton
+                android:id="@+id/te_toggleAlignLeft"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:drawableTop="@drawable/appbar_text_align_left"
+                android:textOff=""
+                android:textOn="" />
+
+            <ToggleButton
+                android:id="@+id/te_toggleAlignCenter"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:drawableTop="@drawable/appbar_text_align_center"
+                android:textOff=""
+                android:textOn="" />
+
+            <ToggleButton
+                android:id="@+id/te_toggleAlignRight"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:drawableTop="@drawable/appbar_text_align_right"
+                android:textOff=""
+                android:textOn="" />
+
+            <ToggleButton
+                android:id="@+id/te_toggleBrush"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:drawableTop="@drawable/appbar_clean"
+                android:textOff=""
+                android:textOn="" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/te_editor_section"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <com.example.richtexteditor.MyEditText
+                android:id="@+id/te_editor"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#FFFFFF"
+                android:fadeScrollbars="false"
+                android:gravity="top"
+                android:inputType="textMultiLine|textCapSentences|textNoSuggestions"
+                android:lines="10"
+                android:padding="10dp"
+                android:scrollbars="vertical" >
+            </com.example.richtexteditor.MyEditText>
+        </LinearLayout>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/te_bottom_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/editor_saveText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/gen_apply" />
+    </RelativeLayout>
+
+</FrameLayout>
