@@ -21,12 +21,13 @@ import com.example.richtexteditor.db.TextDataSource;
  * 
  * Modeled after Android API Html class and Wordpress Android editor.
  *
- * TODO: Fix not being able to select a format before typing text
- * TODO: Fix trying to change font changes midway not changing anything
+ *
+ *
+ *
  */
 public class MainActivity extends Activity implements FragmentActionListener {
 
-  TextDataSource datasource;
+  TextDataSource mDataSource; // Data manager (database)
   FragmentManager mFragmentManager;
   Fragment mFragment;
   String mSavedTextBlock = ""; // should come from server.
@@ -37,14 +38,14 @@ public class MainActivity extends Activity implements FragmentActionListener {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    datasource = new TextDataSource(this);
-    datasource.open();
+    mDataSource = new TextDataSource(this);
+    mDataSource.open();
 
     if (savedInstanceState != null) {
       return;
     }
     
-    if (datasource.hasTextBlock(mSavedTextBlockId)) {
+    if (mDataSource.hasTextBlock(mSavedTextBlockId)) {
       OpenDraftDialog dialog = OpenDraftDialog.newInstance(getOpenDraftDialogCallbackManager());
       dialog.show(getFragmentManager(), "OpenDraftDialog");
     } else {
@@ -58,8 +59,8 @@ public class MainActivity extends Activity implements FragmentActionListener {
   protected void onResume() {
     super.onResume();
 
-    if (! datasource.isOpen()) {
-      datasource.open();
+    if (! mDataSource.isOpen()) {
+      mDataSource.open();
     }
   }
 
@@ -67,14 +68,14 @@ public class MainActivity extends Activity implements FragmentActionListener {
   protected void onPause() {
     super.onPause();
 
-    datasource.close();
+    mDataSource.close();
   }
 
   @Override
   protected void onDestroy() {
     super.onDestroy();
 
-    datasource.close();
+    mDataSource.close();
   }
 
   @Override
@@ -101,7 +102,7 @@ public class MainActivity extends Activity implements FragmentActionListener {
   public void draftEditedText(String editedTextBlock, String editedTextBlockId) {
     hideFragment();
 
-    if (datasource.addTextBlock(editedTextBlockId, editedTextBlock)) {
+    if (mDataSource.addTextBlock(editedTextBlockId, editedTextBlock)) {
       Toast toast = Toast.makeText(this, R.string.toast_text_draft_save_ok, Toast.LENGTH_SHORT);
       toast.setGravity(Gravity.CENTER, 0, 200);
       toast.show();
@@ -114,7 +115,8 @@ public class MainActivity extends Activity implements FragmentActionListener {
 
   @Override
   public void onBackPressed() {
-      super.onBackPressed();
+    // TODO: Toggle show/hiding the fragment some other way
+    super.onBackPressed();
     //  hideFragment();
   }
 
@@ -149,9 +151,9 @@ public class MainActivity extends Activity implements FragmentActionListener {
       @Override
       public void onOpenDraftClick(DialogFragment dialog)
       {
-        mFragment = MyTextEditorFragment.getInstance(datasource.getTextBlock(mSavedTextBlockId), mSavedTextBlockId);
+        mFragment = MyTextEditorFragment.getInstance(mDataSource.getTextBlock(mSavedTextBlockId), mSavedTextBlockId);
         mFragment.setRetainInstance(true);
-        datasource.deleteTextBlock(mSavedTextBlockId);
+        mDataSource.deleteTextBlock(mSavedTextBlockId);
         showFragment();
       }
 
@@ -160,7 +162,7 @@ public class MainActivity extends Activity implements FragmentActionListener {
       {
         mFragment = MyTextEditorFragment.getInstance(mSavedTextBlock, mSavedTextBlockId);
         mFragment.setRetainInstance(true);
-        datasource.deleteTextBlock(mSavedTextBlockId);
+        mDataSource.deleteTextBlock(mSavedTextBlockId);
         showFragment();
       }
     };

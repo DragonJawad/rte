@@ -1,7 +1,5 @@
 package com.example.richtexteditor;
 
-import com.example.richtexteditor.R;
-
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
@@ -22,10 +20,11 @@ import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView.BufferType;
@@ -35,12 +34,30 @@ import com.example.richtexteditor.MyHtml.MyArrayList;
 
 /**
  * Rich text editor Fragment.
+ *
+ * TODO: Fix trying to change font changes midway not changing anything (only on newer devices)
+ * TODO: Fix not being able to select a format before typing text
+ *
+ * TODO: Add clear formatting button (if nothing selected, selects closest "word" and clears)
+ * TODO: Show help text if long clicking an item
+ *
+ * TODO: Make a more modular, independent version of MyTextEditorFragment
  */
 public class MyTextEditorFragment extends Fragment
 implements OnClickListener, TextWatcher, MyEditText.OnSelectionChangedListener
 {
-  private static MyTextEditorFragment textEditor = null;
-  private static Bundle bundle = null;
+  private static final String LOGTAG = "MD/MyTextEditorFragment";
+
+  // Single instance of the text editor fragment
+  private static MyTextEditorFragment mTextEditor = null;
+  // Saves text and id, for ease of storing and retrieving data
+  private static Bundle mBundle = null;
+
+  // Used to determine elapsed time (which is then used to save drafts)
+  private static long mStartTime;
+  //  private static final long TIMEOUT = 2100000;
+  private static final long TIMEOUT = 1000; // set this to some meaningful once save to server is available.
+
   private MyEditText mEditText;
   private int mLastPosition = -1;
   private ToggleButton mTitleToggleButton, mBulletListToggleButton, mBoldToggleButton, mItalicsToggleButton, mUnderlineToggleButton, mStrikethroughSpanToggleButton, mLinkToggleButton, mBrushToggleButton, mAlignRightToggleButton, mAlignCenterToggleButton, mAlignLeftToggleButton;
@@ -53,13 +70,11 @@ implements OnClickListener, TextWatcher, MyEditText.OnSelectionChangedListener
   private static final int LIST_INDENT = 7;
   private MyArrayList htmlList = new MyArrayList();
   private static final boolean IS_JELLY_BEAN_MR1_OR_OLDER = Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1;
-  private static long mStartTime;
-//  private static final long TIMEOUT = 2100000;
-  private static final long TIMEOUT = 1000; // set this to some meaningful once save to server is available.
   public static final int EDIT_LINKS_DIALOG_FRAGMENT = 1;
   public final static String EDIT_LINKS_TAG = "MyTextEditorFragment.LINK";
 
   //Convenience variable to disable buggiest feature of this code.
+    // TODO: Fix lists
   private boolean disableLists = true;
 
   /**
@@ -83,23 +98,22 @@ implements OnClickListener, TextWatcher, MyEditText.OnSelectionChangedListener
    * 
    * @param textBlock
    * @param textBlockId
-   * @param orientationChange
    * @return single instance of TextEditorFragment
    */
   public static MyTextEditorFragment getInstance(String textBlock, String textBlockId) {
 
-    if (textEditor == null) {
-      textEditor = new MyTextEditorFragment();
-      bundle = new Bundle();
-      textEditor.setArguments(bundle);
+    if (mTextEditor == null) {
+      mTextEditor = new MyTextEditorFragment();
+      mBundle = new Bundle();
+      mTextEditor.setArguments(mBundle);
     }
 
-    bundle.putCharSequence(TEXT_BLOCK_TAG, MyHtml.fromHtml(textBlock));
-    bundle.putString(TEXT_BLOCK_ID_TAG, textBlockId);
+    mBundle.putCharSequence(TEXT_BLOCK_TAG, MyHtml.fromHtml(textBlock));
+    mBundle.putString(TEXT_BLOCK_ID_TAG, textBlockId);
 
     mStartTime = System.currentTimeMillis();
 
-    return textEditor;
+    return mTextEditor;
   }
 
   @Override
@@ -108,7 +122,7 @@ implements OnClickListener, TextWatcher, MyEditText.OnSelectionChangedListener
 
     if (container == null) return null;
 
-    View layout = (View) inflater.inflate(R.layout.text_editor_layout, container, false);
+    View layout = inflater.inflate(R.layout.text_editor_layout, container, false);
 
     getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
@@ -118,6 +132,7 @@ implements OnClickListener, TextWatcher, MyEditText.OnSelectionChangedListener
     mEditText.setOnSelectionChangedListener(this);
     mEditText.addTextChangedListener(this);
 
+    // Find and set up all the editor option listeners to this fragment
     mTitleToggleButton = (ToggleButton) layout.findViewById(R.id.te_toggleTitle);
     mTitleToggleButton.setOnClickListener(this);
     mBoldToggleButton = (ToggleButton) layout.findViewById(R.id.te_toggleBold);
@@ -140,8 +155,8 @@ implements OnClickListener, TextWatcher, MyEditText.OnSelectionChangedListener
     mBrushToggleButton.setOnClickListener(this);
     mBrushToggleButton.setChecked(false);
 
+    // Lists are extremely buggy- set member variable in code to enable/disable easily
     mBulletListToggleButton = (ToggleButton) layout.findViewById(R.id.te_toggleBulletList);
-
     if (disableLists) {
       mBulletListToggleButton.setVisibility(View.GONE);
     } else {
@@ -167,7 +182,7 @@ implements OnClickListener, TextWatcher, MyEditText.OnSelectionChangedListener
     super.onPause();
 
     try {
-      bundle.putCharSequence(TEXT_BLOCK_TAG, mEditText.getText());
+      mBundle.putCharSequence(TEXT_BLOCK_TAG, mEditText.getText());
     } catch(NullPointerException e) {
       e.printStackTrace();
     }
@@ -176,29 +191,47 @@ implements OnClickListener, TextWatcher, MyEditText.OnSelectionChangedListener
   @Override
   public void onClick(View v) {
     int id = v.getId();
-    if (id == R.id.te_toggleTitle) {
-      formatBtnClick(mTitleToggleButton, "h2");
-    } else if (id == R.id.te_toggleBold) {
-      formatBtnClick(mBoldToggleButton, "b");
-    } else if (id == R.id.te_toggleItalics) {
-      formatBtnClick(mItalicsToggleButton, "i");
-    } else if (id == R.id.te_toggleUnderline) {
-      formatBtnClick(mUnderlineToggleButton, "u");
-    } else if (id == R.id.te_toggleStrikeThrough) {
-      formatBtnClick(mStrikethroughSpanToggleButton, "st");
-    } else if (id == R.id.te_toggleBulletList) {
-      formatBtnClick(mBulletListToggleButton, "ul");
-    } else if (id == R.id.te_toggleLinks) {
-      formatBtnClick(mLinkToggleButton, "link");
-    } else if (id == R.id.te_toggleAlignRight) {
-      formatBtnClick(mAlignRightToggleButton, "aRight");
-    } else if (id == R.id.te_toggleAlignCenter) {
-      formatBtnClick(mAlignCenterToggleButton, "aCenter");
-    } else if (id == R.id.te_toggleAlignLeft) {
-      formatBtnClick(mAlignLeftToggleButton, "aLeft");
-    } else if (id == R.id.te_toggleBrush) {
-      formatBtnClick(mBrushToggleButton, "brush");
-      mBrushToggleButton.setChecked(false);
+
+    // Format text according to which button was clicked
+    switch(v.getId()) {
+      case R.id.te_toggleTitle:
+        formatBtnClick(mTitleToggleButton, "h2");
+        break;
+      case R.id.te_toggleBold:
+        formatBtnClick(mBoldToggleButton, "b");
+        break;
+      case R.id.te_toggleItalics:
+        formatBtnClick(mItalicsToggleButton, "i");
+        break;
+      case R.id.te_toggleUnderline:
+        formatBtnClick(mUnderlineToggleButton, "u");
+        break;
+      case R.id.te_toggleStrikeThrough:
+        formatBtnClick(mStrikethroughSpanToggleButton, "st");
+        break;
+      case R.id.te_toggleBulletList:
+        formatBtnClick(mBulletListToggleButton, "ul");
+        break;
+      case R.id.te_toggleLinks:
+        formatBtnClick(mLinkToggleButton, "link");
+        break;
+      case R.id.te_toggleAlignRight:
+        formatBtnClick(mAlignRightToggleButton, "aRight");
+        break;
+      case R.id.te_toggleAlignCenter:
+        formatBtnClick(mAlignCenterToggleButton, "aCenter");
+        break;
+      case R.id.te_toggleAlignLeft:
+        formatBtnClick(mAlignLeftToggleButton, "aLeft");
+        break;
+      case R.id.te_toggleBrush:
+        formatBtnClick(mBrushToggleButton, "brush");
+        mBrushToggleButton.setChecked(false);
+        break;
+      default:
+        // Didn't find a match, at this point must have been an error
+        Log.e(LOGTAG, "onClick(View v): No match found!");
+        return;
     }
   }
 
