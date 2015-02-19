@@ -1,9 +1,5 @@
 package com.example.richtexteditor;
 
-import com.example.richtexteditor.OpenDraftDialog.OpenDraftDialogListener;
-import com.example.richtexteditor.R;
-import com.example.richtexteditor.db.TextDataSource;
-
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.Fragment;
@@ -15,12 +11,18 @@ import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
+import com.example.richtexteditor.OpenDraftDialog.OpenDraftDialogListener;
+import com.example.richtexteditor.db.TextDataSource;
+
 /** 
  * Starting point for Rich Text Editing experience for Android.
  * 
  * MyTextEditorFragment and MyHtml do most of the string parsing and editing logic.
  * 
  * Modeled after Android API Html class and Wordpress Android editor.
+ *
+ * TODO: Fix not being able to select a format before typing text
+ * TODO: Fix trying to change font changes midway not changing anything
  */
 public class MainActivity extends Activity implements FragmentActionListener {
 
