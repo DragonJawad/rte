@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Rich Text Editor</string>
+    <string name="gen_apply">Save</string>
+    <string name="gen_yes">Yes</string>
+    <string name="gen_no">No</string>
+    <string name="te_draft_dialog_main">Your text edit was not saved. Would you like to retrieve it ?</string>
+    <string name="te_enter_title">Enter link or email address</string>
+    <string name="te_enter_url">Link:</string>
+    <string name="te_enter_email">Email:</string>
+    <string name="toast_te_invalid_url">Invalid link address. Please try again. E.g: www.example.com</string>
+    <string name="toast_te_invalid_email">Invalid email address. Please try again. E.g: example@example.com</string>
+    <string name="toast_text_draft_save_ok">Draft saved</string>
+    <string name="toast_text_draft_save_nok">Failed to save draft. Apologies for your inconvenience</string>
+    <string name="toast_text_server_save_ok">Text saved</string>
+    <string name="toast_text_server_save_nok">Failed to save text. Apologies for your inconvenience</string>
+
+</resources>
