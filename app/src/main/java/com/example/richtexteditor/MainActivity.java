@@ -1,5 +1,9 @@
 package com.example.richtexteditor;
 
+import com.example.richtexteditor.OpenDraftDialog.OpenDraftDialogListener;
+import com.example.richtexteditor.R;
+import com.example.richtexteditor.db.TextDataSource;
+
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.Fragment;
@@ -10,9 +14,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
-
-import com.example.richtexteditor.OpenDraftDialog.OpenDraftDialogListener;
-import com.example.richtexteditor.db.TextDataSource;
 
 /** 
  * Starting point for Rich Text Editing experience for Android.
